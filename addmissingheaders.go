@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"crypto/rand"
+	"encoding/hex"
 )
 
 // Config holds configuration to be passed to the plugin
@@ -40,6 +42,8 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 func (plugin *Plugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	for key, value := range plugin.requestHeaders {
 		if values := req.Header.Values(key); values == nil {
+			id := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+			values = id
 			req.Header.Set(key, value)
 		}
 	}

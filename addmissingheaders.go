@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"net"
 	"net/http"
-	"crypto/rand"
-	"encoding/hex"
+	"strings"
 )
 
 // Config holds configuration to be passed to the plugin
@@ -39,11 +39,16 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	}, nil
 }
 
+func generateUUID() string {
+	u := uuid.New()
+	return strings.ReplaceAll(u.String(), "-", "")
+}
+
 func (plugin *Plugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	for key, value := range plugin.requestHeaders {
+	for key := range plugin.requestHeaders {
 		if values := req.Header.Values(key); values == nil {
-			id := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
-			req.Header.Set(key, id)
+			correlationId := generateUUID()
+			req.Header.Set(key, correlationId)
 		}
 	}
 

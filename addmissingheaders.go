@@ -46,7 +46,7 @@ func generateUUID() string {
 
 func (plugin *Plugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	for key := range plugin.requestHeaders {
-		if values, ok := req.Header.Values(key); ok && values != nil {
+		if values := req.Header.Values(key); values == nil {
 			correlationId := generateUUID()
 			req.Header.Set(key, correlationId)
 		}

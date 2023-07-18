@@ -1,7 +1,7 @@
 displayName: Add Missing Headers
 type: middleware
 
-import: github.com/jerrywoo96/AddMissingHeaders
+import: github.com/artb1sh/AddMissingHeaders
 
 summary: Reads headers from app service/client, adds missing headers, but not override existing headers, and forwards them to client/app service.
 

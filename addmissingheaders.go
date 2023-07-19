@@ -45,19 +45,18 @@ func generateUUID() string {
 }
 
 func (plugin *Plugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	correlationID := generateUUID()
 	for key := range plugin.requestHeaders {
-		if values := req.Header.Values(key); values == nil {
-			correlationId := generateUUID()
-			req.Header.Set(key, correlationId)
+		if req.Header[key] == nil {
+			req.Header.Set(key, correlationID)
 		}
 	}
 
-	if len(plugin.responseHeaders) == 0 {
+	if len(plugin.responseHeaders) > 0 {
+		plugin.next.ServeHTTP(newResponseModifier(plugin.responseHeaders, rw), req)
+	} else {
 		plugin.next.ServeHTTP(rw, req)
-		return
 	}
-
-	plugin.next.ServeHTTP(newResponseModifier(plugin.responseHeaders, rw), req)
 }
 
 type responseModifier struct {
@@ -93,9 +92,7 @@ func (r *responseModifier) WriteHeader(code int) {
 	}()
 
 	for key, value := range r.responseHeaders {
-		if values := r.rw.Header().Values(key); values == nil {
-			r.rw.Header().Set(key, value)
-		}
+		r.rw.Header().Set(key, value)
 	}
 
 	r.rw.WriteHeader(code)
